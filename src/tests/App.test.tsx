@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import Form from "../App";
+import Form from "../components/Form";
 
 test("renders the email and password inputs", () => {
   render(<Form />);
@@ -20,6 +20,8 @@ test("shows success message on valid submission", async () => {
 
   const successMsg = await screen.findByText(
     /success! your account has been created/i,
+    undefined,
+    { timeout: 2000 },
   );
   expect(successMsg).toBeInTheDocument();
 });

@@ -1,6 +1,6 @@
 # Signup Form Challenge
 
-This repo implements the take-home Signup Form challenge. The app renders a reusable `<Form />` component inside `src/App.tsx` that validates user input, calls the provided mock `API`, and surfaces success/error feedback with polished styling and accessibility affordances.
+This repo implements the Silver.dev take-home Signup Form challenge. The app renders a reusable `<Form />` component inside `src/App.tsx` that validates user input, calls the provided mock `API`, and surfaces success/error feedback with polished styling and accessibility affordances.
 
 ## 1. Getting Started (fresh install)
 
@@ -21,15 +21,15 @@ This repo implements the take-home Signup Form challenge. The app renders a reus
 
 ## 2. Testing the project
 
-The project uses Vitest plus Testing Library to assert the form’s behavior.
+Tests run with Jest (via `react-scripts test`) and React Testing Library to simulate real user interaction.
 
-- **Run the full suite once**
+- **Run the suite (watch mode)**
   ```bash
-  npx vitest run
+  npm test
   ```
-- **Run in watch/UI mode (optional)**
+- **CI-style single run (no watch)**
   ```bash
-  npx vitest
+  CI=true npm test
   ```
 
 ## 3. Manual verification checklist
@@ -55,18 +55,11 @@ Follow these usage scenarios after running `npm start` to confirm the product re
 
 ## 4. Technical decisions & trade-offs
 
-- **Typed validation helpers** — Email/password checks live in small pure functions (`hasSpecialCharacter`, `hasNumber`, etc.) to keep `handleSubmit` readable and make future reuse trivial.
+- **Typed validation helpers** — Email/password checks live in small pure functions (`hasSpecialCharacter`, `hasNumber`, etc.) to keep `handleSubmit` readable and make reuse trivial.
 - **Union status + typed API** — `FormStatus` and `ApiResponse` unions drive UI state (loading/disabled feedback) and solve TS’s `unknown` response warning. Typing the mock API also makes it easy to swap with a real endpoint.
-- **Single component for clarity** — Requirements are limited, so keeping the form inline in `App.tsx` avoids unnecessary prop drilling while still exposing a clean `<Form />` unit the tests can render directly.
-- **Pure CSS styling** — Requirements forbid extra UI libs, so the look is achieved with a single `styles.css` file (card layout, responsive padding, focus outlines) to stay lightweight but polished.
-- **Testing stack** — Vitest + Testing Library mirrors how a user interacts with the DOM. Tests cover validation, API error, success flow, and disabled-button states to prevent regressions in critical UX paths.
+- **Dedicated form module + shared types** — `components/Form.tsx` and `types/form.ts` keep `App.tsx` focused on composition, simplify testing the form in isolation, and make the component extensible for other surfaces.
+- **Accessibility & UX polish** — `aria-live="polite"`, descriptive helper text, focus outlines, and disabled states reduce surprises for keyboard or screen-reader users beyond the bare minimum spec.
+- **Pure CSS styling** — Since Tailwind (my usual go-to) wasn’t part of the starter `package.json`, I inferred sticking with vanilla CSS was safest. Everything lives in `styles.css` (card layout, responsive padding, focus outlines) to stay lightweight but polished.
+- **Testing stack** — Jest + Testing Library mirrors how a user interacts with the DOM. Specs cover validation, API error, success flow, and disabled-button states to prevent regressions in critical UX paths.
 
-Trade-off: sticking to a hand-rolled form instead of pulling a form library (Formik, React Hook Form) keeps dependencies minimal but means validation logic is manual. Given the tight scope, this was an acceptable trade.
-
-## 5. Extra mile highlights
-
-1. **Accessibility & UX polish** — `aria-live="polite"`, descriptive hints, and disabled states reduce surprises for keyboard or screen-reader users beyond the bare minimum spec.
-2. **Robust automated tests** — Added high-signal Vitest specs so the reviewer can verify the expected behavior non-interactively.
-3. **Detailed documentation & verification steps** — This README spells out exactly how to run, test, and validate the scenarios so interviewers don’t have to guess, satisfying the “no troubleshooting” goal.
-
-These additions go beyond the original bullet list yet stay aligned with the challenge scope, providing a reviewer-quality experience.
+Trade-off: sticking to a hand-rolled form instead of pulling a form library (Formik, React Hook Form) keeps dependencies minimal but means validation logic is manual. Given the tight scope, this was an acceptable trade, and the extra validation/a11y polish plus focused docs go the extra mile without bloating dependencies.
