@@ -37,14 +37,14 @@ Tests run with Jest (via `react-scripts test`) and React Testing Library to simu
 Follow these usage scenarios after running `npm start` to confirm the product requirements end-to-end:
 
 1. **Invalid email**
-   - Type `invalid-email` in the Email field and a valid password (e.g., `Password1!`).
+   - Type `invalid-email` (or `invalid-email@gmail`/`invalid-email.com`) in the Email field and a valid password (e.g., `Password1!`).
    - Click `Create account`.
    - Verify the inline feedback reads “Please enter a valid email address…”.
 2. **Fail each password rule**
    - Use `valid@example.com` and try passwords missing each rule (no special char, no number, <8 chars).
    - Confirm the feedback lists every violated rule so the user knows what to fix.
 3. **Duplicate email scenario**
-   - Use email `repeated@gmail.com` with `Password123!`.
+   - Use email `repeated@gmail.com` with `Password123!` (or any valid password).
    - Submit and wait ~1 second (mock API delay). You should see “This email is already registered. Try another one.”
 4. **Successful signup**
    - Use any other email (e.g., `newuser@example.com`) and `Password123!`.

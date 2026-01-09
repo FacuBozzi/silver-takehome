@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { ApiResponse, FormStatus, SignupPayload } from "../types/form";
+import { FormStatus } from "../types/form";
 import {
   hasSpecialCharacter,
   hasNumber,
