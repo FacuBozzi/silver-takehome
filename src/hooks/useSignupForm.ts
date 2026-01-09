@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { FormStatus, SignupRecord } from "../types/form";
 import mockAPI from "../utils/mockAPI";
 import {
@@ -38,6 +38,7 @@ export const useSignupForm = () => {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [history, setHistory] = useState<SignupRecord[]>([]);
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("signupHistory");
@@ -68,6 +69,9 @@ export const useSignupForm = () => {
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      if (isSubmittingRef.current) {
+        return;
+      }
       resetFeedback();
 
       const normalizedEmail = email.trim();
@@ -92,6 +96,7 @@ export const useSignupForm = () => {
       }
 
       setStatus("submitting");
+      isSubmittingRef.current = true;
 
       try {
         const response = await mockAPI({ email: normalizedEmail, password });
@@ -112,6 +117,8 @@ export const useSignupForm = () => {
         setStatus("error");
         setFeedback("Something went wrong. Please try again.");
         console.error(error);
+      } finally {
+        isSubmittingRef.current = false;
       }
     },
     [email, password, history, persistHistory, resetFeedback],
