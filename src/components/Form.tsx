@@ -6,18 +6,7 @@ import {
   hasValidLength,
   isValidEmail,
 } from "../utils/validation";
-
-const API = (data: SignupPayload): Promise<ApiResponse> =>
-  new Promise((res) => {
-    const isRepeated = data.email === "repeated@gmail.com";
-    setTimeout(
-      () =>
-        res({
-          status: isRepeated ? "ERROR" : "OK",
-        }),
-      1000,
-    );
-  });
+import API from "../utils/mockAPI";
 
 export default function Form() {
   const [email, setEmail] = useState("");
