@@ -4,7 +4,7 @@ import "./styles.css";
 This is the takehome version of the challenge Signup Form.
 
 In this version, you are to design and build a reusable and extensible
-Form component, and apply it to the use case of a Signup Form. 
+Form component, and apply it to the use case of a Signup Form.
 
 Signup Form:
 
@@ -15,7 +15,7 @@ Build a user Signup form in React with the following features.
 3. Password must include
     1.  at least one special character
     2. one number and be at least 8 characters
-4. Submission request handling  
+4. Submission request handling
    1. Utilize the mock API function to handle submissions
 5. Basic aesthetics with pure CSS
 
@@ -47,7 +47,9 @@ function Form() {
     const issues: string[] = [];
 
     if (!isValidEmail(email)) {
-      issues.push("Please enter a valid email address that includes “@” and a domain.");
+      issues.push(
+        "Please enter a valid email address that includes “@” and a domain.",
+      );
     }
 
     if (!hasSpecialCharacter(password)) {
@@ -157,7 +159,11 @@ function Form() {
           </div>
         )}
 
-        <button type="submit" className="primary-btn" disabled={status === "submitting"}>
+        <button
+          type="submit"
+          className="primary-btn"
+          disabled={status === "submitting"}
+        >
           {status === "submitting" ? "Submitting..." : "Create account"}
         </button>
       </form>
@@ -165,7 +171,7 @@ function Form() {
   );
 }
 
-function API(data) {
+function API(data: any) {
   return new Promise((res) => {
     const isRepeated = data.email === "repeated@gmail.com";
     setTimeout(
@@ -173,7 +179,7 @@ function API(data) {
         res({
           status: isRepeated ? "ERROR" : "OK",
         }),
-      1000
+      1000,
     );
   });
 }
