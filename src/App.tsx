@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import "./styles.css";
 /*
 This is the takehome version of the challenge Signup Form.
@@ -27,11 +27,75 @@ Build a user Signup form in React with the following features.
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
+const hasSpecialCharacter = (value: string) => /[^A-Za-z0-9]/.test(value);
+const hasNumber = (value: string) => /\d/.test(value);
+const hasValidLength = (value: string) => value.length >= 8;
+const isValidEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
+
 function Form() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  const resetFeedback = () => {
+    setStatus("idle");
+    setFeedback(null);
+  };
+
+  const validate = () => {
+    const issues: string[] = [];
+
+    if (!isValidEmail(email)) {
+      issues.push("Please enter a valid email address that includes “@” and a domain.");
+    }
+
+    if (!hasSpecialCharacter(password)) {
+      issues.push("Password needs at least one special character.");
+    }
+
+    if (!hasNumber(password)) {
+      issues.push("Password needs at least one number.");
+    }
+
+    if (!hasValidLength(password)) {
+      issues.push("Password needs to be at least 8 characters long.");
+    }
+
+    return issues;
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    resetFeedback();
+
+    const issues = validate();
+
+    if (issues.length) {
+      setStatus("error");
+      setFeedback(issues.join(" "));
+      return;
+    }
+
+    setStatus("submitting");
+
+    try {
+      const response = await API({ email, password });
+      if (response.status === "OK") {
+        setStatus("success");
+        setFeedback("Success! Your account has been created.");
+        setEmail("");
+        setPassword("");
+      } else {
+        setStatus("error");
+        setFeedback("This email is already registered. Try another one.");
+      }
+    } catch (error) {
+      setStatus("error");
+      setFeedback("Something went wrong. Please try again.");
+      console.error(error);
+    }
+  };
 
   return (
     <section className="form-card" aria-live="polite">
@@ -43,7 +107,7 @@ function Form() {
         </p>
       </header>
 
-      <form className="signup-form" noValidate>
+      <form className="signup-form" noValidate onSubmit={handleSubmit}>
         <div className="form-field">
           <label htmlFor="email">Email</label>
           <input
