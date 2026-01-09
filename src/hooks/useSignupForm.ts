@@ -1,5 +1,5 @@
-import { FormEvent, useCallback, useState } from "react";
-import { FormStatus } from "../types/form";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormStatus, SignupRecord } from "../types/form";
 import mockAPI from "../utils/mockAPI";
 import {
   hasSpecialCharacter,
@@ -37,6 +37,28 @@ export const useSignupForm = () => {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [history, setHistory] = useState<SignupRecord[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("signupHistory");
+    if (stored) {
+      try {
+        setHistory(JSON.parse(stored));
+      } catch (error) {
+        console.error("Failed to parse signup history", error);
+      }
+    }
+  }, []);
+
+  const persistHistory = useCallback((records: SignupRecord[]) => {
+    setHistory(records);
+    localStorage.setItem("signupHistory", JSON.stringify(records));
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    localStorage.removeItem("signupHistory");
+  }, []);
 
   const resetFeedback = useCallback(() => {
     setStatus("idle");
@@ -48,7 +70,8 @@ export const useSignupForm = () => {
       event.preventDefault();
       resetFeedback();
 
-      const issues = validateFields(email.trim(), password);
+      const normalizedEmail = email.trim();
+      const issues = validateFields(normalizedEmail, password);
 
       if (issues.length) {
         setStatus("error");
@@ -56,15 +79,31 @@ export const useSignupForm = () => {
         return;
       }
 
+      const alreadySignedUp = history.some(
+        (entry) => entry.email.toLowerCase() === normalizedEmail.toLowerCase(),
+      );
+
+      if (alreadySignedUp) {
+        setStatus("error");
+        setFeedback(
+          "This email already signed up on this device. Try a different one.",
+        );
+        return;
+      }
+
       setStatus("submitting");
 
       try {
-        const response = await mockAPI({ email: email.trim(), password });
+        const response = await mockAPI({ email: normalizedEmail, password });
         if (response.status === "OK") {
+          const timestamp = Date.now();
+          const newRecord: SignupRecord = { email: normalizedEmail, timestamp };
+
           setStatus("success");
           setFeedback("Success! Your account has been created.");
           setEmail("");
           setPassword("");
+          persistHistory([newRecord, ...history].slice(0, 5));
         } else {
           setStatus("error");
           setFeedback("This email is already registered. Try another one.");
@@ -75,7 +114,7 @@ export const useSignupForm = () => {
         console.error(error);
       }
     },
-    [email, password, resetFeedback],
+    [email, password, history, persistHistory, resetFeedback],
   );
 
   return {
@@ -86,5 +125,7 @@ export const useSignupForm = () => {
     setEmail,
     setPassword,
     handleSubmit,
+    history,
+    clearHistory,
   };
 };

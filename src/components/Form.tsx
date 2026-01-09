@@ -1,4 +1,10 @@
+import { useRef } from "react";
+import type { KeyboardEvent } from "react";
 import { useSignupForm } from "../hooks/useSignupForm";
+import { usePasswordStrength } from "../hooks/usePasswordStrength";
+import PasswordChecklist from "./PasswordChecklist";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
+import SignupHistory from "./SignupHistory";
 
 export default function Form() {
   const {
@@ -9,7 +15,20 @@ export default function Form() {
     setEmail,
     setPassword,
     handleSubmit,
+    history,
+    clearHistory,
   } = useSignupForm();
+  const strength = usePasswordStrength(password);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleShortcut = (event: KeyboardEvent<HTMLFormElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      event.preventDefault();
+      if (status !== "submitting") {
+        formRef.current?.requestSubmit();
+      }
+    }
+  };
 
   return (
     <section className="form-card" aria-live="polite">
@@ -21,7 +40,14 @@ export default function Form() {
         </p>
       </header>
 
-      <form className="signup-form" noValidate onSubmit={handleSubmit}>
+      <form
+        ref={formRef}
+        data-testid="signup-form"
+        className="signup-form"
+        noValidate
+        onSubmit={handleSubmit}
+        onKeyDown={handleShortcut}
+      >
         <div className="form-field">
           <label htmlFor="email">Email</label>
           <input
@@ -54,16 +80,14 @@ export default function Form() {
           <small id="password-hint" className="hint">
             Needs at least 8 chars, one number, and one special character.
           </small>
+          <PasswordChecklist rules={strength.ruleStates} />
         </div>
 
-        <section className="requirements">
-          <h3>Password Requirements</h3>
-          <ul>
-            <li>At least one special character</li>
-            <li>At least one number</li>
-            <li>Minimum of 8 characters</li>
-          </ul>
-        </section>
+        <PasswordStrengthMeter
+          label={strength.label}
+          percent={strength.percent}
+          passedRules={strength.passedRules}
+        />
 
         {feedback && (
           <div className={`form-feedback form-feedback--${status}`}>
@@ -78,7 +102,13 @@ export default function Form() {
         >
           {status === "submitting" ? "Submitting..." : "Create account"}
         </button>
+        <p className="shortcut-hint">
+          Tip: Press ⌘ + Enter (Mac) or Ctrl + Enter (Win/Linux) to submit from
+          the keyboard.
+        </p>
       </form>
+
+      <SignupHistory history={history} onClear={clearHistory} />
     </section>
   );
 }

@@ -8,3 +8,8 @@ export type SignupPayload = {
 export type ApiResponse = {
   status: "OK" | "ERROR";
 };
+
+export type SignupRecord = {
+  email: string;
+  timestamp: number;
+};

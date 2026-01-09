@@ -52,12 +52,25 @@ Follow these usage scenarios after running `npm start` to confirm the product re
      - Button shows “Submitting…” and is disabled during the request.
      - Success message “Success! Your account has been created.” appears.
      - Inputs clear back to empty strings.
+5. **Password strength meter & checklist**
+   - While typing different passwords, watch the checklist badges toggle and the strength bar label move from “Needs work” → “Excellent” as more rules are satisfied.
+6. **Keyboard shortcut**
+   - With focus anywhere inside the form, press `Ctrl + Enter` (or `⌘ + Enter` on macOS); verify it submits just like clicking the button.
+7. **Recent signup history**
+   - After a successful signup, a “Recent signups” panel appears with the email/timestamp. Refresh the page—it should persist thanks to `localStorage`. Use the `Clear history` button to remove all entries (and verify the panel disappears + storage clears).
+   - Attempt another signup using the exact same email (case-insensitive) without clearing history; the form should block it locally with an inline message about that email already being registered on this device.
 
-## 4. Technical decisions & trade-offs
+## 4. Surprise features
+
+- **Live password strength system** — Requirement badges update in real time and feed a strength bar so users know exactly which rule they’re missing.
+- **Power-user keyboard shortcut** — `Ctrl/⌘ + Enter` submits the form instantly; a tooltip reminds reviewers of the shortcut.
+- **Recent signup history** — Successful submissions are cached (locally) and rendered in a mini activity log with a “Clear history” control and duplicate-email guard, showcasing state persistence patterns and lifecycle hygiene.
+
+## 5. Technical decisions & trade-offs
 
 - **Typed validation helpers** — Email/password checks live in small pure functions (`hasSpecialCharacter`, `hasNumber`, etc.) to keep `handleSubmit` readable and make reuse trivial.
 - **Union status + typed API** — `FormStatus` and `ApiResponse` unions drive UI state (loading/disabled feedback) and solve TS’s `unknown` response warning. Typing the mock API (now exported from `utils/mockAPI.ts`) also makes it easy to swap in a real endpoint.
-- **Dedicated form module + shared types + hook** — `components/Form.tsx` stays presentational while `hooks/useSignupForm.ts` centralizes validation + submission logic, and `types/form.ts` shares the shape definitions. This separation keeps `App.tsx` focused on composition and makes reuse/extensibility easier.
+- **Dedicated form module + shared types + hook** — `components/Form.tsx` stays presentational while `hooks/useSignupForm.ts` centralizes validation/submission/history logic, and `types/form.ts` shares the shape definitions. This separation keeps `App.tsx` focused on composition and makes reuse/extensibility easier.
 - **Accessibility & UX polish** — `aria-live="polite"`, descriptive helper text, focus outlines, and disabled states reduce surprises for keyboard or screen-reader users beyond the bare minimum spec.
 - **Pure CSS styling** — Since Tailwind (my usual go-to) wasn’t part of the starter `package.json`, I inferred sticking with vanilla CSS was safest. Everything lives in `styles.css` (card layout, responsive padding, focus outlines) to stay lightweight but polished.
 - **Testing stack** — Jest + Testing Library mirrors how a user interacts with the DOM. Specs cover validation, API error, success flow, and disabled-button states to prevent regressions in critical UX paths.
