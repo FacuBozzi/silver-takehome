@@ -1,77 +1,32 @@
-import { FormEvent, useState } from "react";
-import { ApiResponse, FormStatus, SignupPayload } from "../types/form";
-import {
-  hasSpecialCharacter,
-  hasNumber,
-  hasValidLength,
-  isValidEmail,
-} from "../utils/validation";
-import API from "../utils/mockAPI";
+import { useRef } from "react";
+import type { KeyboardEvent } from "react";
+import { useSignupForm } from "../hooks/useSignupForm";
+import { usePasswordStrength } from "../hooks/usePasswordStrength";
+import PasswordChecklist from "./PasswordChecklist";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
+import SignupHistory from "./SignupHistory";
 
 export default function Form() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<FormStatus>("idle");
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const {
+    email,
+    password,
+    status,
+    feedback,
+    setEmail,
+    setPassword,
+    handleSubmit,
+    history,
+    clearHistory,
+  } = useSignupForm();
+  const strength = usePasswordStrength(password);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const resetFeedback = () => {
-    setStatus("idle");
-    setFeedback(null);
-  };
-
-  const validate = () => {
-    const issues: string[] = [];
-
-    if (!isValidEmail(email)) {
-      issues.push(
-        "Please enter a valid email address that includes “@” and a domain.",
-      );
-    }
-
-    if (!hasSpecialCharacter(password)) {
-      issues.push("Password needs at least one special character.");
-    }
-
-    if (!hasNumber(password)) {
-      issues.push("Password needs at least one number.");
-    }
-
-    if (!hasValidLength(password)) {
-      issues.push("Password needs to be at least 8 characters long.");
-    }
-
-    return issues;
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    resetFeedback();
-
-    const issues = validate();
-
-    if (issues.length) {
-      setStatus("error");
-      setFeedback(issues.join(" "));
-      return;
-    }
-
-    setStatus("submitting");
-
-    try {
-      const response = await API({ email, password });
-      if (response.status === "OK") {
-        setStatus("success");
-        setFeedback("Success! Your account has been created.");
-        setEmail("");
-        setPassword("");
-      } else {
-        setStatus("error");
-        setFeedback("This email is already registered. Try another one.");
+  const handleShortcut = (event: KeyboardEvent<HTMLFormElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      event.preventDefault();
+      if (status !== "submitting") {
+        formRef.current?.requestSubmit();
       }
-    } catch (error) {
-      setStatus("error");
-      setFeedback("Something went wrong. Please try again.");
-      console.error(error);
     }
   };
 
@@ -85,7 +40,14 @@ export default function Form() {
         </p>
       </header>
 
-      <form className="signup-form" noValidate onSubmit={handleSubmit}>
+      <form
+        ref={formRef}
+        data-testid="signup-form"
+        className="signup-form"
+        noValidate
+        onSubmit={handleSubmit}
+        onKeyDown={handleShortcut}
+      >
         <div className="form-field">
           <label htmlFor="email">Email</label>
           <input
@@ -118,16 +80,14 @@ export default function Form() {
           <small id="password-hint" className="hint">
             Needs at least 8 chars, one number, and one special character.
           </small>
+          <PasswordChecklist rules={strength.ruleStates} />
         </div>
 
-        <section className="requirements">
-          <h3>Password Requirements</h3>
-          <ul>
-            <li>At least one special character</li>
-            <li>At least one number</li>
-            <li>Minimum of 8 characters</li>
-          </ul>
-        </section>
+        <PasswordStrengthMeter
+          label={strength.label}
+          percent={strength.percent}
+          passedRules={strength.passedRules}
+        />
 
         {feedback && (
           <div className={`form-feedback form-feedback--${status}`}>
@@ -142,7 +102,13 @@ export default function Form() {
         >
           {status === "submitting" ? "Submitting..." : "Create account"}
         </button>
+        <p className="shortcut-hint">
+          Tip: Press ⌘ + Enter (Mac) or Ctrl + Enter (Win/Linux) to submit from
+          the keyboard.
+        </p>
       </form>
+
+      <SignupHistory history={history} onClear={clearHistory} />
     </section>
   );
 }

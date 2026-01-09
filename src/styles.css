@@ -75,6 +75,78 @@ body {
   font-size: 0.85rem;
 }
 
+.password-checklist {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.password-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #8b8ba7;
+}
+
+.password-check.pass {
+  color: #046c4e;
+  font-weight: 500;
+}
+
+.password-check span:first-child {
+  font-size: 0.85rem;
+}
+
+.strength-meter {
+  margin-top: 1.25rem;
+}
+
+.strength-meter__header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #5c5c72;
+  margin-bottom: 0.3rem;
+}
+
+.strength-meter__header strong {
+  color: #1d1d29;
+}
+
+.strength-meter__track {
+  width: 100%;
+  height: 8px;
+  background: #eceff7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.strength-meter__fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.strength-0 {
+  background: #f87171;
+}
+
+.strength-1 {
+  background: #fbbf24;
+}
+
+.strength-2 {
+  background: #34d399;
+}
+
+.strength-3 {
+  background: #22c55e;
+}
+
 .requirements {
   background: #f4f6ff;
   border-radius: 12px;
@@ -138,6 +210,65 @@ body {
   opacity: 0.6;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.shortcut-hint {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6d6d84;
+}
+
+.history {
+  margin-top: 2rem;
+  border-top: 1px solid #eceff7;
+  padding-top: 1.5rem;
+}
+
+.history h3 {
+  margin-top: 0;
+}
+
+.history__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.history li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #5c5c72;
+}
+
+.history li strong {
+  color: #1d1d29;
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid #dfe3f1;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  color: #44445c;
+  cursor: pointer;
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+.ghost-btn:hover {
+  background: #f4f6ff;
+  border-color: #4a5dff;
 }
 
 @media (max-width: 540px) {
