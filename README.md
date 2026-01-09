@@ -57,7 +57,7 @@ Follow these usage scenarios after running `npm start` to confirm the product re
 
 - **Typed validation helpers** — Email/password checks live in small pure functions (`hasSpecialCharacter`, `hasNumber`, etc.) to keep `handleSubmit` readable and make reuse trivial.
 - **Union status + typed API** — `FormStatus` and `ApiResponse` unions drive UI state (loading/disabled feedback) and solve TS’s `unknown` response warning. Typing the mock API (now exported from `utils/mockAPI.ts`) also makes it easy to swap in a real endpoint.
-- **Dedicated form module + shared types** — `components/Form.tsx` and `types/form.ts` keep `App.tsx` focused on composition, simplify testing the form in isolation, and make the component extensible for other surfaces.
+- **Dedicated form module + shared types + hook** — `components/Form.tsx` stays presentational while `hooks/useSignupForm.ts` centralizes validation + submission logic, and `types/form.ts` shares the shape definitions. This separation keeps `App.tsx` focused on composition and makes reuse/extensibility easier.
 - **Accessibility & UX polish** — `aria-live="polite"`, descriptive helper text, focus outlines, and disabled states reduce surprises for keyboard or screen-reader users beyond the bare minimum spec.
 - **Pure CSS styling** — Since Tailwind (my usual go-to) wasn’t part of the starter `package.json`, I inferred sticking with vanilla CSS was safest. Everything lives in `styles.css` (card layout, responsive padding, focus outlines) to stay lightweight but polished.
 - **Testing stack** — Jest + Testing Library mirrors how a user interacts with the DOM. Specs cover validation, API error, success flow, and disabled-button states to prevent regressions in critical UX paths.
