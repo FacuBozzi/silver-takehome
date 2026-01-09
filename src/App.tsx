@@ -26,6 +26,8 @@ Build a user Signup form in React with the following features.
 */
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
+type SignupPayload = { email: string; password: string };
+type ApiResponse = { status: "OK" | "ERROR" };
 
 const hasSpecialCharacter = (value: string) => /[^A-Za-z0-9]/.test(value);
 const hasNumber = (value: string) => /\d/.test(value);
@@ -171,7 +173,7 @@ function Form() {
   );
 }
 
-function API(data: any) {
+function API(data: SignupPayload): Promise<ApiResponse> {
   return new Promise((res) => {
     const isRepeated = data.email === "repeated@gmail.com";
     setTimeout(
