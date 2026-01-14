@@ -75,6 +75,21 @@ body {
   font-size: 0.85rem;
 }
 
+.form-field input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.form-field input[aria-invalid="true"]:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+.field-error {
+  color: #b42318;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .password-checklist {
   margin-top: 0.5rem;
   display: flex;
