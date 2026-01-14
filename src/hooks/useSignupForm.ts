@@ -8,28 +8,35 @@ import {
   isValidEmail,
 } from "../utils/validation";
 
-const validateFields = (email: string, password: string) => {
-  const issues: string[] = [];
+export interface FieldErrors {
+  email: string | null;
+  password: string | null;
+}
+
+const validateFields = (email: string, password: string): FieldErrors => {
+  const errors: FieldErrors = { email: null, password: null };
 
   if (!isValidEmail(email)) {
-    issues.push(
-      "Please enter a valid email address that includes “@” and a domain.",
-    );
+    errors.email =
+      'Please enter a valid email address that includes "@" and a domain.';
   }
 
+  const passwordIssues: string[] = [];
   if (!hasSpecialCharacter(password)) {
-    issues.push("Password needs at least one special character.");
+    passwordIssues.push("at least one special character");
   }
-
   if (!hasNumber(password)) {
-    issues.push("Password needs at least one number.");
+    passwordIssues.push("at least one number");
   }
-
   if (!hasValidLength(password)) {
-    issues.push("Password needs to be at least 8 characters long.");
+    passwordIssues.push("at least 8 characters");
   }
 
-  return issues;
+  if (passwordIssues.length) {
+    errors.password = `Password needs ${passwordIssues.join(", ")}.`;
+  }
+
+  return errors;
 };
 
 export const useSignupForm = () => {
@@ -37,6 +44,10 @@ export const useSignupForm = () => {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({
+    email: null,
+    password: null,
+  });
   const [history, setHistory] = useState<SignupRecord[]>([]);
   const isSubmittingRef = useRef(false);
 
@@ -64,6 +75,7 @@ export const useSignupForm = () => {
   const resetFeedback = useCallback(() => {
     setStatus("idle");
     setFeedback(null);
+    setFieldErrors({ email: null, password: null });
   }, []);
 
   const handleSubmit = useCallback(
@@ -75,11 +87,16 @@ export const useSignupForm = () => {
       resetFeedback();
 
       const normalizedEmail = email.trim();
-      const issues = validateFields(normalizedEmail, password);
+      const errors = validateFields(normalizedEmail, password);
+      const hasErrors = errors.email || errors.password;
 
-      if (issues.length) {
+      if (hasErrors) {
         setStatus("error");
-        setFeedback(issues.join(" "));
+        setFieldErrors(errors);
+        const messages = [errors.email, errors.password]
+          .filter(Boolean)
+          .join(" ");
+        setFeedback(messages);
         return;
       }
 
@@ -129,6 +146,7 @@ export const useSignupForm = () => {
     password,
     status,
     feedback,
+    fieldErrors,
     setEmail,
     setPassword,
     handleSubmit,

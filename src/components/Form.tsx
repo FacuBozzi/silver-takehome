@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import type { KeyboardEvent } from "react";
 import { useSignupForm } from "../hooks/useSignupForm";
 import { usePasswordStrength } from "../hooks/usePasswordStrength";
@@ -12,6 +12,7 @@ export default function Form() {
     password,
     status,
     feedback,
+    fieldErrors,
     setEmail,
     setPassword,
     handleSubmit,
@@ -20,6 +21,19 @@ export default function Form() {
   } = useSignupForm();
   const strength = usePasswordStrength(password);
   const formRef = useRef<HTMLFormElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  //focus first invalid field on error
+  useEffect(() => {
+    if (status === "error") {
+      if (fieldErrors.email) {
+        emailInputRef.current?.focus();
+      } else if (fieldErrors.password) {
+        passwordInputRef.current?.focus();
+      }
+    }
+  }, [status, fieldErrors]);
 
   const handleShortcut = (event: KeyboardEvent<HTMLFormElement>) => {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -51,6 +65,7 @@ export default function Form() {
         <div className="form-field">
           <label htmlFor="email">Email</label>
           <input
+            ref={emailInputRef}
             id="email"
             name="email"
             type="email"
@@ -58,16 +73,25 @@ export default function Form() {
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            aria-describedby="email-hint"
+            aria-describedby={
+              fieldErrors.email ? "email-error email-hint" : "email-hint"
+            }
+            aria-invalid={fieldErrors.email ? "true" : undefined}
           />
           <small id="email-hint" className="hint">
-            Must contain “@” and a domain like “example.com”.
+            Must contain "@" and a domain like "example.com".
           </small>
+          {fieldErrors.email && (
+            <span id="email-error" className="field-error" role="alert">
+              {fieldErrors.email}
+            </span>
+          )}
         </div>
 
         <div className="form-field">
           <label htmlFor="password">Password</label>
           <input
+            ref={passwordInputRef}
             id="password"
             name="password"
             type="password"
@@ -75,11 +99,21 @@ export default function Form() {
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            aria-describedby="password-hint"
+            aria-describedby={
+              fieldErrors.password
+                ? "password-error password-hint"
+                : "password-hint"
+            }
+            aria-invalid={fieldErrors.password ? "true" : undefined}
           />
           <small id="password-hint" className="hint">
             Needs at least 8 chars, one number, and one special character.
           </small>
+          {fieldErrors.password && (
+            <span id="password-error" className="field-error" role="alert">
+              {fieldErrors.password}
+            </span>
+          )}
           <PasswordChecklist rules={strength.ruleStates} />
         </div>
 
@@ -90,7 +124,11 @@ export default function Form() {
         />
 
         {feedback && (
-          <div className={`form-feedback form-feedback--${status}`}>
+          <div
+            className={`form-feedback form-feedback--${status}`}
+            role={status === "error" ? "alert" : "status"}
+            aria-live="polite"
+          >
             {feedback}
           </div>
         )}
